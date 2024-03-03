@@ -1,19 +1,32 @@
 package com.example.cw
 
+import android.content.Context
+import android.content.res.Resources
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.material.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.example.cw.ui.theme.CwTheme
+import java.io.InputStream
+import java.util.*
+import kotlin.random.Random
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
+import kotlin.math.log
 
 class GuessCountry : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -25,12 +38,427 @@ class GuessCountry : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background
                 ) {
-
+                    GuessCountryContent()
                 }
             }
         }
     }
 }
+
+@Composable
+fun GuessCountryContent() {
+    val context = LocalContext.current
+    val countryMap = remember { mutableMapOf<String,String>() }
+
+    readJson(context,countryMap)
+
+
+
+    // List of image resource IDs
+    val imageResourceIds = listOf(
+        R.drawable.ad,
+        R.drawable.ae,
+        R.drawable.af,
+        R.drawable.ag,
+        R.drawable.ai,
+        R.drawable.al,
+        R.drawable.am,
+        R.drawable.ao,
+        R.drawable.aq,
+        R.drawable.ar,
+        R.drawable.as_,
+        R.drawable.at,
+        R.drawable.au,
+        R.drawable.aw,
+        R.drawable.ax,
+        R.drawable.az,
+        R.drawable.ba,
+        R.drawable.bb,
+        R.drawable.bd,
+        R.drawable.be,
+        R.drawable.bf,
+        R.drawable.bg,
+        R.drawable.bh,
+        R.drawable.bi,
+        R.drawable.bj,
+        R.drawable.bl,
+        R.drawable.bm,
+        R.drawable.bn,
+        R.drawable.bo,
+        R.drawable.bq,
+        R.drawable.br,
+        R.drawable.bs,
+        R.drawable.bt,
+        R.drawable.bv,
+        R.drawable.bw,
+        R.drawable.by,
+        R.drawable.bz,
+        R.drawable.ca,
+        R.drawable.cc,
+        R.drawable.cd,
+        R.drawable.cf,
+        R.drawable.cg,
+        R.drawable.ch,
+        R.drawable.ci,
+        R.drawable.ck,
+        R.drawable.cl,
+        R.drawable.cm,
+        R.drawable.cn,
+        R.drawable.co,
+        R.drawable.cr,
+        R.drawable.cu,
+        R.drawable.cv,
+        R.drawable.cw,
+        R.drawable.cx,
+        R.drawable.cy,
+        R.drawable.cz,
+        R.drawable.de,
+        R.drawable.dj,
+        R.drawable.dk,
+        R.drawable.dm,
+        R.drawable.doo,
+        R.drawable.dz,
+        R.drawable.ec,
+        R.drawable.ee,
+        R.drawable.eg,
+        R.drawable.eh,
+        R.drawable.er,
+        R.drawable.es,
+        R.drawable.et,
+        R.drawable.eu,
+        R.drawable.fi,
+        R.drawable.fj,
+        R.drawable.fk,
+        R.drawable.fm,
+        R.drawable.fo,
+        R.drawable.fr,
+        R.drawable.ga,
+        R.drawable.gbeng,
+        R.drawable.gbnir,
+        R.drawable.gbsct,
+        R.drawable.gbwls,
+        R.drawable.gb,
+        R.drawable.gd,
+        R.drawable.ge,
+        R.drawable.gf,
+        R.drawable.gg,
+        R.drawable.gh,
+        R.drawable.gi,
+        R.drawable.gl,
+        R.drawable.gm,
+        R.drawable.gn,
+        R.drawable.gp,
+        R.drawable.gq,
+        R.drawable.gr,
+        R.drawable.gs,
+        R.drawable.gt,
+        R.drawable.gu,
+        R.drawable.gw,
+        R.drawable.gy,
+        R.drawable.hk,
+        R.drawable.hm,
+        R.drawable.hn,
+        R.drawable.hr,
+        R.drawable.ht,
+        R.drawable.hu,
+        R.drawable.id,
+        R.drawable.ie,
+        R.drawable.il,
+        R.drawable.im,
+        R.drawable.in_,
+        R.drawable.io,
+        R.drawable.iq,
+        R.drawable.ir,
+        R.drawable.is_,
+        R.drawable.it,
+        R.drawable.je,
+        R.drawable.jm,
+        R.drawable.jo,
+        R.drawable.jp,
+        R.drawable.ke,
+        R.drawable.kg,
+        R.drawable.kh,
+        R.drawable.ki,
+        R.drawable.km,
+        R.drawable.kn,
+        R.drawable.kp,
+        R.drawable.kr,
+        R.drawable.kw,
+        R.drawable.ky,
+        R.drawable.kz,
+        R.drawable.la,
+        R.drawable.lb,
+        R.drawable.lc,
+        R.drawable.li,
+        R.drawable.lk,
+        R.drawable.lr,
+        R.drawable.ls,
+        R.drawable.lt,
+        R.drawable.lu,
+        R.drawable.lv,
+        R.drawable.ly,
+        R.drawable.ma,
+        R.drawable.mc,
+        R.drawable.md,
+        R.drawable.me,
+        R.drawable.mf,
+        R.drawable.mg,
+        R.drawable.mh,
+        R.drawable.mk,
+        R.drawable.ml,
+        R.drawable.mm,
+        R.drawable.mn,
+        R.drawable.mo,
+        R.drawable.mp,
+        R.drawable.mq,
+        R.drawable.mr,
+        R.drawable.ms,
+        R.drawable.mt,
+        R.drawable.mu,
+        R.drawable.mv,
+        R.drawable.mw,
+        R.drawable.mx,
+        R.drawable.my,
+        R.drawable.mz,
+        R.drawable.na,
+        R.drawable.nc,
+        R.drawable.ne,
+        R.drawable.nf,
+        R.drawable.ng,
+        R.drawable.ni,
+        R.drawable.nl,
+        R.drawable.no,
+        R.drawable.np,
+        R.drawable.nr,
+        R.drawable.nu,
+        R.drawable.nz,
+        R.drawable.om,
+        R.drawable.pa,
+        R.drawable.pe,
+        R.drawable.pf,
+        R.drawable.pg,
+        R.drawable.ph,
+        R.drawable.pk,
+        R.drawable.pl,
+        R.drawable.pm,
+        R.drawable.pn,
+        R.drawable.pr,
+        R.drawable.ps,
+        R.drawable.pt,
+        R.drawable.pw,
+        R.drawable.py,
+        R.drawable.qa,
+        R.drawable.re,
+        R.drawable.ro,
+        R.drawable.rs,
+        R.drawable.ru,
+        R.drawable.rw,
+        R.drawable.sa,
+        R.drawable.sb,
+        R.drawable.sc,
+        R.drawable.sd,
+        R.drawable.se,
+        R.drawable.sg,
+        R.drawable.sh,
+        R.drawable.si,
+        R.drawable.sj,
+        R.drawable.sk,
+        R.drawable.sl,
+        R.drawable.sm,
+        R.drawable.sn,
+        R.drawable.so,
+        R.drawable.sr,
+        R.drawable.ss,
+        R.drawable.st,
+        R.drawable.sv,
+        R.drawable.sx,
+        R.drawable.sy,
+        R.drawable.sz,
+        R.drawable.tc,
+        R.drawable.td,
+        R.drawable.tf,
+        R.drawable.tg,
+        R.drawable.th,
+        R.drawable.tj,
+        R.drawable.tk,
+        R.drawable.tl,
+        R.drawable.tm,
+        R.drawable.tn,
+        R.drawable.to,
+        R.drawable.tr,
+        R.drawable.tt,
+        R.drawable.tv,
+        R.drawable.tw,
+        R.drawable.tz,
+        R.drawable.ua,
+        R.drawable.ug,
+        R.drawable.um,
+        R.drawable.us,
+        R.drawable.uy,
+        R.drawable.uz,
+        R.drawable.va,
+        R.drawable.vc,
+        R.drawable.ve,
+        R.drawable.vg,
+        R.drawable.vi,
+        R.drawable.vn,
+        R.drawable.vu,
+        R.drawable.wf,
+        R.drawable.ws,
+        R.drawable.xk,
+        R.drawable.ye,
+        R.drawable.yt,
+        R.drawable.za,
+        R.drawable.zm,
+        R.drawable.zw
+
+    )
+
+    // State to hold the selected country key
+    var randomCountryKey by remember { mutableStateOf("") }
+
+
+    // Generate a random index
+    var randomIndex by remember { mutableStateOf(Random.nextInt(0, imageResourceIds.size)) }
+
+
+
+
+    // Get the painter for the randomly selected image
+    val randomImagePainter: Painter = painterResource(id = imageResourceIds[randomIndex])
+
+
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(text = "Guess the Country!")
+
+
+        Box(
+            modifier = Modifier.size(200.dp),
+            contentAlignment = Alignment.Center
+            ){
+            Image(
+                painter = randomImagePainter,
+                contentDescription = "Random Image",
+                modifier = Modifier
+                    .size(200.dp)
+                    .clip(shape = RoundedCornerShape(8.dp))
+            )
+        }
+
+        Button(onClick = {
+            randomIndex = Random.nextInt(0, imageResourceIds.size)
+            randomCountryKey = countryMap.keys.toList()[randomIndex]
+        }) {
+            Text(text = "Next")
+
+        }
+        DropdownExample(countryMap,randomCountryKey)
+
+
+
+
+    }
+
+}
+fun readJson(context: Context, countryMap: MutableMap<String, String>) {
+    // Read JSON from assets
+    try {
+        val json: String = context.assets.open("countries.json").bufferedReader().use{it.readText() }
+
+        // Parse JSON using kotlinx.serialization
+        val countryDataList = Json.decodeFromString<Map<String, String>>(json)
+
+        // Update the countryMap
+        countryMap.putAll(countryDataList)
+    } catch (e: Exception) {
+        // Handle exceptions (e.g., JSON parsing errors)
+        // You may want to log the exception or show an error message
+        e.printStackTrace()
+        }
+   }
+
+//
+//fun readJson(resources: Resources, resourceId: Int): JSONArray {
+//    val inputStream: InputStream = resources.openRawResource(resourceId)
+//    val jsonString = inputStream.bufferedReader().use { it.readText() }
+//    return JSONArray(jsonString)
+//}
+//
+
+@Composable
+fun DropdownExample(countryMap: Map<String, String>, randomCountryKey: String) {
+    val context = LocalContext.current
+    var expanded by remember { mutableStateOf(false) }
+    var selectedOption by remember { mutableStateOf("Click Here to Select") }
+    var selectedCountryKey by remember { mutableStateOf("") }
+
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(text = "Select Country")
+
+        TextButton(onClick = { expanded = true }) {
+            Text(selectedOption)
+        }
+        Surface(
+            modifier = Modifier
+               .padding(16.dp)
+        ) {
+
+
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false },
+            ) {
+                countryMap.forEach { (key, value) ->
+                    DropdownMenuItem(onClick = {
+                        selectedCountryKey = key
+                        selectedOption = value
+                        expanded = false
+                    }) {
+                        Text(value)
+                    }
+                }
+            }
+
+            Button(
+                modifier = Modifier.padding(16.dp),
+                onClick = { checkSelectedCountry(selectedCountryKey,randomCountryKey,countryMap) }) {
+                Text(text = "Submit")
+            }
+
+        }
+    }
+
+}
+
+
+fun checkSelectedCountry(selectedCountryKey: String, randomCountryKey: String, countryMap: Map<String, String>) {
+    val selectedCountryName = countryMap[selectedCountryKey]
+    val randomCountryName = countryMap[randomCountryKey]
+
+    if (selectedCountryKey == randomCountryKey) {
+        // Correct guess
+        Log.d("GuessCountry", "Correct! The selected country is $selectedCountryName")
+        // You can perform any additional actions here, such as updating UI or keeping score
+    } else {
+        // Incorrect guess
+        Log.d(
+            "GuessCountry",
+            "Incorrect! The selected country is $selectedCountryName, but the correct country is $randomCountryName"
+        )
+        // You can perform any additional actions here, such as showing a message to the user
+    }
+}
+
+
+
+
 
 
 
