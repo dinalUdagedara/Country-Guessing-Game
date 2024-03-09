@@ -16,6 +16,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
@@ -44,7 +45,8 @@ class MainActivity : ComponentActivity() {
                         Column(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .padding(24.dp),
+                                .padding(24.dp)
+                            ,
                             verticalArrangement = Arrangement.Center,
                             horizontalAlignment = Alignment.CenterHorizontally,
 
@@ -64,10 +66,14 @@ class MainActivity : ComponentActivity() {
                             Row(
                                 modifier = Modifier
                                     .padding(16.dp)) {
+
                                 Column(
                                     modifier = Modifier
                                         .weight(1f)
                                         .padding(25.dp)
+
+
+
                                 ) {
                                     Text(text = "Guess The Country")
                                 }

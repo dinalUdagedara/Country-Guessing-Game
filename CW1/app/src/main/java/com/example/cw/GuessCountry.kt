@@ -4,10 +4,13 @@ import android.content.Context
 import android.content.res.Resources
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.*
@@ -15,6 +18,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -49,6 +53,8 @@ class GuessCountry : ComponentActivity() {
 fun GuessCountryContent() {
     val context = LocalContext.current
     val countryMap = remember { mutableMapOf<String,String>() }
+    var submitted by remember { mutableStateOf(false) } // State to track if the user has submitted their guess
+
 
     readJson(context,countryMap)
 
@@ -326,7 +332,8 @@ fun GuessCountryContent() {
 
     // Get the painter for the randomly selected image
     val randomImagePainter: Painter = painterResource(id = imageResourceIds[randomIndex])
-
+    randomIndex = Random.nextInt(0, imageResourceIds.size)
+    randomCountryKey = countryMap.keys.toList()[randomIndex]
 
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -349,21 +356,24 @@ fun GuessCountryContent() {
             )
         }
 
-        Button(onClick = {
-            randomIndex = Random.nextInt(0, imageResourceIds.size)
-            randomCountryKey = countryMap.keys.toList()[randomIndex]
-        }) {
-            Text(text = "Next")
-
-        }
-        DropdownExample(countryMap,randomCountryKey)
-
-
-
-
+//        Button(onClick = {
+//
+//        }) {
+//            Text(text = "Next")
+//
+//        }
+        DropdownExample(
+            countryMap = countryMap,
+            randomCountryKey = randomCountryKey,
+        )
     }
 
+
+
+
 }
+
+
 fun readJson(context: Context, countryMap: MutableMap<String, String>) {
     // Read JSON from assets
     try {
@@ -390,11 +400,16 @@ fun readJson(context: Context, countryMap: MutableMap<String, String>) {
 //
 
 @Composable
-fun DropdownExample(countryMap: Map<String, String>, randomCountryKey: String) {
+fun DropdownExample(
+    countryMap: Map<String, String>,
+    randomCountryKey: String
+) {
     val context = LocalContext.current
     var expanded by remember { mutableStateOf(false) }
     var selectedOption by remember { mutableStateOf("Click Here to Select") }
     var selectedCountryKey by remember { mutableStateOf("") }
+    var showToast by remember { mutableStateOf(false) }
+
 
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -411,15 +426,16 @@ fun DropdownExample(countryMap: Map<String, String>, randomCountryKey: String) {
         ) {
 
 
-            DropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false },
+            LazyColumn(
+                modifier = Modifier.fillMaxWidth(),
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
             ) {
-                countryMap.forEach { (key, value) ->
+                items(countryMap.keys.toList()) { key ->
+                    val value = countryMap[key] ?: ""
                     DropdownMenuItem(onClick = {
                         selectedCountryKey = key
                         selectedOption = value
-                        expanded = false
+
                     }) {
                         Text(value)
                     }
@@ -428,12 +444,48 @@ fun DropdownExample(countryMap: Map<String, String>, randomCountryKey: String) {
 
             Button(
                 modifier = Modifier.padding(16.dp),
-                onClick = { checkSelectedCountry(selectedCountryKey,randomCountryKey,countryMap) }) {
+                onClick = {
+                    checkSelectedCountry(selectedCountryKey,randomCountryKey,countryMap)
+                    showToast = true
+
+
+
+                }) {
                 Text(text = "Submit")
             }
 
         }
     }
+
+    if (showToast){
+        val correctCountry = countryMap[randomCountryKey]
+        val correctAnswer = selectedCountryKey == randomCountryKey
+        if (correctAnswer) {
+            if (correctCountry != null) {
+                ShowDialog(
+
+                    context = context,
+                    result = "CORRECT!",
+                    message = "Congratulations You have Selected the Correct Answer which is:",
+                    correctCountryName= correctCountry,
+                    onDismissRequest = {showToast = false},
+                    correctAnswer = correctAnswer
+                )
+            }
+        }else{
+            if (correctCountry != null) {
+                ShowDialog(
+                    context = context,
+                    result = "Wrong!",
+                    message = "The Selected Country is $selectedOption, but correct Country is: ",
+                    correctCountryName= correctCountry,
+                    onDismissRequest = {showToast = false},
+                    correctAnswer = false
+                )
+            }
+        }
+    }
+
 
 }
 
@@ -457,8 +509,44 @@ fun checkSelectedCountry(selectedCountryKey: String, randomCountryKey: String, c
 }
 
 
+//@Composable
+//fun ShowToast(context: Context, message: String) {
+//    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+//}
 
 
 
 
 
+@Composable
+fun ShowDialog(context: Context,result:String, message: String ,correctCountryName:String, onDismissRequest:() -> Unit, correctAnswer:Boolean) {
+    val backgroundColor = if (correctAnswer) Color.Green else Color.Red
+    val textColor = if (correctAnswer) Color.Green else Color.Red
+    AlertDialog(
+        onDismissRequest = onDismissRequest,
+        title = {
+            Text(text = "Result")
+        },
+        text = {
+            Row() {
+                Column() {
+                    Text(text = result , color = textColor)
+                    Text(text = message)
+                    Text(text = correctCountryName, color = Color.Blue)
+
+                }
+            }
+
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    onDismissRequest()
+                }
+            ) {
+                Text(text = "OK")
+            }
+        },
+
+    )
+}
