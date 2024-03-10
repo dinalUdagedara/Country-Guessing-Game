@@ -470,16 +470,12 @@ fun DropdownExample(
                         submitted = false
                         onNextClicked()
                         showToast = false
-
-
                         Log.d("NextButtonToggled", "Next button clicked")
 
                         }
                     else{
                         checkSelectedCountry(selectedCountryKey,randomCountryKey,countryMap)
                         showToast = true
-
-
                         Log.d("SubmitButtonToggled", "Submit button clicked")
 
 
@@ -561,9 +557,15 @@ fun checkSelectedCountry(selectedCountryKey: String, randomCountryKey: String, c
 
 
 
-
 @Composable
-fun ShowDialog(context: Context,result:String, message: String ,correctCountryName:String, onDismissRequest:() -> Unit, correctAnswer:Boolean) {
+fun ShowDialog(
+    context: Context,
+    result: String,
+    message: String,
+    correctCountryName: String,
+    onDismissRequest: () -> Unit, // Function to handle dialog dismissal
+    correctAnswer: Boolean
+) {
     val backgroundColor = if (correctAnswer) Color.Green else Color.Red
     val textColor = if (correctAnswer) Color.Green else Color.Red
     AlertDialog(
@@ -574,23 +576,23 @@ fun ShowDialog(context: Context,result:String, message: String ,correctCountryNa
         text = {
             Row() {
                 Column() {
-                    Text(text = result , color = textColor)
+                    Text(text = result, color = textColor)
                     Text(text = message)
                     Text(text = correctCountryName, color = Color.Blue)
 
                 }
             }
-
         },
         confirmButton = {
             Button(
                 onClick = {
+                    // Call the provided onDismissRequest function to dismiss the dialog
                     onDismissRequest()
+                    Log.d("OnClick", "Function is Called")
                 }
             ) {
                 Text(text = "OK")
             }
-        },
-
+        }
     )
 }
