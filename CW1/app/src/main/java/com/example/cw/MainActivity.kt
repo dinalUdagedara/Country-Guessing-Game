@@ -26,7 +26,7 @@ import org.w3c.dom.Text
 
 class MainActivity : ComponentActivity() {
 
-    lateinit var navController: NavHostController
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {

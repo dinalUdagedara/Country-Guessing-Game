@@ -35,6 +35,7 @@ import kotlin.math.log
 class GuessCountry : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         setContent {
 
             CwTheme {
@@ -45,8 +46,10 @@ class GuessCountry : ComponentActivity() {
                     GuessCountryContent()
                 }
             }
+
         }
     }
+
 }
 
 @Composable
@@ -332,8 +335,8 @@ fun GuessCountryContent() {
 
     // Get the painter for the randomly selected image
     val randomImagePainter: Painter = painterResource(id = imageResourceIds[randomIndex])
-    randomIndex = Random.nextInt(0, imageResourceIds.size)
-    randomCountryKey = countryMap.keys.toList()[randomIndex]
+//    randomIndex = Random.nextInt(0, imageResourceIds.size)
+//    randomCountryKey = countryMap.keys.toList()[randomIndex]
 
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -357,7 +360,8 @@ fun GuessCountryContent() {
         }
 
 //        Button(onClick = {
-//
+//            randomIndex = (randomIndex + 1) % imageResourceIds.size
+//            randomCountryKey = countryMap.keys.toList()[randomIndex]
 //        }) {
 //            Text(text = "Next")
 //
@@ -365,6 +369,12 @@ fun GuessCountryContent() {
         DropdownExample(
             countryMap = countryMap,
             randomCountryKey = randomCountryKey,
+            onNextClicked = {
+                //Reset the submitted state and genrate a new random index and country key
+//                submitted = false
+                randomIndex = Random.nextInt(0, imageResourceIds.size)
+                randomCountryKey = countryMap.keys.toList()[randomIndex]
+            }
         )
     }
 
@@ -402,13 +412,17 @@ fun readJson(context: Context, countryMap: MutableMap<String, String>) {
 @Composable
 fun DropdownExample(
     countryMap: Map<String, String>,
-    randomCountryKey: String
+    randomCountryKey: String,
+    onNextClicked:()-> Unit
 ) {
     val context = LocalContext.current
     var expanded by remember { mutableStateOf(false) }
     var selectedOption by remember { mutableStateOf("Click Here to Select") }
     var selectedCountryKey by remember { mutableStateOf("") }
     var showToast by remember { mutableStateOf(false) }
+    var submitted by remember { mutableStateOf(false) } // State to track if the user has submitted their guess
+    var nextClicked by remember { mutableStateOf(true) }
+
 
 
     Column(
@@ -445,23 +459,47 @@ fun DropdownExample(
             Button(
                 modifier = Modifier.padding(16.dp),
                 onClick = {
-                    checkSelectedCountry(selectedCountryKey,randomCountryKey,countryMap)
-                    showToast = true
+//                    Log.d("DropdownExample", "Submit button clicked")
 
 
+                    submitted = true
+
+                    nextClicked = !nextClicked
+
+                    if (nextClicked ){
+                        submitted = false
+                        onNextClicked()
+                        showToast = false
+
+
+                        Log.d("NextButtonToggled", "Next button clicked")
+
+                        }
+                    else{
+                        checkSelectedCountry(selectedCountryKey,randomCountryKey,countryMap)
+                        showToast = true
+
+
+                        Log.d("SubmitButtonToggled", "Submit button clicked")
+
+
+                    }
 
                 }) {
-                Text(text = "Submit")
+                Text(text = if (submitted && !nextClicked) "Next" else "Submit") // Change the button text based on the submitted state
+
             }
 
         }
     }
 
     if (showToast){
+        Log.d("ShowToast is Working", "Working Fine")
         val correctCountry = countryMap[randomCountryKey]
         val correctAnswer = selectedCountryKey == randomCountryKey
         if (correctAnswer) {
             if (correctCountry != null) {
+                Log.d("ShowToast Correct Country ", "Working Fine")
                 ShowDialog(
 
                     context = context,
@@ -474,6 +512,7 @@ fun DropdownExample(
             }
         }else{
             if (correctCountry != null) {
+                Log.d("ShowToast Wrong Country ", "Working Fine")
                 ShowDialog(
                     context = context,
                     result = "Wrong!",
@@ -483,8 +522,13 @@ fun DropdownExample(
                     correctAnswer = false
                 )
             }
+            else{
+                Log.d("ShowToast Correct Country ", "Not Working Fine")
+            }
         }
+
     }
+
 
 
 }
