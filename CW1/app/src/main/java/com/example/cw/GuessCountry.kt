@@ -377,10 +377,6 @@ fun GuessCountryContent() {
             }
         )
     }
-
-
-
-
 }
 
 
@@ -423,8 +419,6 @@ fun DropdownExample(
     var submitted by remember { mutableStateOf(false) } // State to track if the user has submitted their guess
     var nextClicked by remember { mutableStateOf(true) }
 
-
-
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -438,8 +432,6 @@ fun DropdownExample(
             modifier = Modifier
                .padding(16.dp)
         ) {
-
-
             LazyColumn(
                 modifier = Modifier.fillMaxWidth(),
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
@@ -449,7 +441,6 @@ fun DropdownExample(
                     DropdownMenuItem(onClick = {
                         selectedCountryKey = key
                         selectedOption = value
-
                     }) {
                         Text(value)
                     }
@@ -460,7 +451,6 @@ fun DropdownExample(
                 modifier = Modifier.padding(16.dp),
                 onClick = {
 //                    Log.d("DropdownExample", "Submit button clicked")
-
 
                     submitted = true
 

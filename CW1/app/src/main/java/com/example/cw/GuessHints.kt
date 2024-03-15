@@ -361,6 +361,8 @@ fun DropDownHints(
     var submitted by remember { mutableStateOf(false) } // State to track if the user has submitted their guess.
     var nextClicked by remember { mutableStateOf(true) }
 
+    correctAnswer = false
+
 
     Column(
         modifier = Modifier.fillMaxSize(),
