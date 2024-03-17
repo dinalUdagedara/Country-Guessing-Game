@@ -328,7 +328,9 @@ fun GuessCountryContent() {
 
 
     // Generate a random index
-    var randomIndex by remember { mutableStateOf(Random.nextInt(0, imageResourceIds.size)) }
+//    var randomIndex by remember { mutableStateOf(Random.nextInt(0, imageResourceIds.size)) }
+    // Generate a random index
+    var randomIndex by remember { mutableStateOf(Random(seed = System.currentTimeMillis()).nextInt(0, imageResourceIds.size)) }
 
 
 
@@ -412,12 +414,12 @@ fun DropdownExample(
     onNextClicked:()-> Unit
 ) {
     val context = LocalContext.current
-    var expanded by remember { mutableStateOf(false) }
     var selectedOption by remember { mutableStateOf("Click Here to Select") }
     var selectedCountryKey by remember { mutableStateOf("") }
     var showToast by remember { mutableStateOf(false) }
     var submitted by remember { mutableStateOf(false) } // State to track if the user has submitted their guess
     var nextClicked by remember { mutableStateOf(true) }
+    var isEnable by remember { mutableStateOf(true) }
 
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -425,56 +427,75 @@ fun DropdownExample(
     ) {
         Text(text = "Select Country")
 
-        TextButton(onClick = { expanded = true }) {
-            Text(selectedOption)
+        TextButton(
+            onClick = { },
+            ) {
+            Text(countryMap[randomCountryKey].toString() )
+        }
+        Button(onClick = {
+            onNextClicked()
+            isEnable = false
+        }, enabled = isEnable
+        ) {
+            Text(text = "Click Here to Start")
         }
         Surface(
             modifier = Modifier
                .padding(16.dp)
         ) {
-            LazyColumn(
-                modifier = Modifier.fillMaxWidth(),
-                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                items(countryMap.keys.toList()) { key ->
-                    val value = countryMap[key] ?: ""
-                    DropdownMenuItem(onClick = {
-                        selectedCountryKey = key
-                        selectedOption = value
+                Button(
+                    modifier = Modifier.padding(16.dp),
+                    enabled = !isEnable,
+                    onClick = {
+//                    Log.d("DropdownExample", "Submit button clicked")
+
+                        submitted = true
+
+                        nextClicked = !nextClicked
+
+                        if (nextClicked ){
+                            submitted = false
+                            onNextClicked()
+                            showToast = false
+                            Log.d("NextButtonToggled", "Next button clicked")
+
+                        }
+                        else{
+                            checkSelectedCountry(selectedCountryKey,randomCountryKey,countryMap)
+                            showToast = true
+                            Log.d("SubmitButtonToggled", "Submit button clicked")
+
+
+                        }
+
                     }) {
-                        Text(value)
+                    Text(text = if (submitted && !nextClicked) "Next" else "Submit") // Change the button text based on the submitted state
+                }
+
+
+                LazyColumn(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+                ) {
+                    items(countryMap.keys.toList()) { key ->
+                        val value = countryMap[key] ?: ""
+                        DropdownMenuItem(onClick = {
+                            selectedCountryKey = key
+                            selectedOption = value
+                        }) {
+                            Text(value)
+                        }
                     }
                 }
             }
 
-            Button(
-                modifier = Modifier.padding(16.dp),
-                onClick = {
-//                    Log.d("DropdownExample", "Submit button clicked")
-
-                    submitted = true
-
-                    nextClicked = !nextClicked
-
-                    if (nextClicked ){
-                        submitted = false
-                        onNextClicked()
-                        showToast = false
-                        Log.d("NextButtonToggled", "Next button clicked")
-
-                        }
-                    else{
-                        checkSelectedCountry(selectedCountryKey,randomCountryKey,countryMap)
-                        showToast = true
-                        Log.d("SubmitButtonToggled", "Submit button clicked")
 
 
-                    }
-
-                }) {
-                Text(text = if (submitted && !nextClicked) "Next" else "Submit") // Change the button text based on the submitted state
-
-            }
 
         }
     }

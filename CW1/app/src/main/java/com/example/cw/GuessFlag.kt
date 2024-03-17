@@ -59,7 +59,7 @@ class GuessFlag : ComponentActivity() {
 
 
 
-
+var nextButtonVisible = false
 
 
 
@@ -75,6 +75,7 @@ fun GuessFlagContent(
 ) {
     Log.d(" GuessFlagContent","This is Working")
     val context = LocalContext.current
+
 
 
 //    // Get random flag details
@@ -93,7 +94,10 @@ fun GuessFlagContent(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(text = "Guess the Flag!")
-        Button(onClick = { onNextButtonClick() },
+        Button(onClick = {
+            onNextButtonClick()
+            nextButtonVisible = false },
+            enabled =nextButtonVisible,
             modifier = Modifier.padding(top =6.dp )) {
             Text(text = "Next")
         }
@@ -143,6 +147,8 @@ fun FlagButton(
         onClick = {
             selectedFlag = flagName
             onShowDialogChange(true)
+            nextButtonVisible = true
+
         },
         modifier = Modifier
             .size(200.dp)
@@ -466,8 +472,12 @@ fun rememberRandomIndicesAndFlag(): Triple<String, String, List<Pair<Int, String
 
     )
 
-    // Generate random indices
-    val randomIndices = remember{ List(3) { Random.nextInt(imageResourceIds.size) }}
+//    // Generate random indices
+//    val randomIndices = remember{ List(100) { Random.nextInt(imageResourceIds.size) }}
+    // Generate a list of random indices
+    val randomIndices = remember {
+        List(100) { Random(seed = System.currentTimeMillis() + it).nextInt(imageResourceIds.size) }
+    }
 
     val randomIndex = randomIndices.random()
     val (randomCountryKey, randomFlagName) = remember {countryMap.entries.toList()[randomIndex]}

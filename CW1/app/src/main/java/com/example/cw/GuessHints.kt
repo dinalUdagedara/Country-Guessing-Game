@@ -311,7 +311,8 @@ fun GuessHintsContent() {
     )
 
     var randomCountryKey by remember { mutableStateOf("") }
-    var randomIndex by remember { mutableStateOf(Random.nextInt(0, imageResourceIds.size)) }
+    // Generate a random index
+    var randomIndex by remember { mutableStateOf(Random(seed = System.currentTimeMillis()).nextInt(0, imageResourceIds.size)) }
     val randomImagePainter: Painter = painterResource(id = imageResourceIds[randomIndex])
 
 
@@ -356,14 +357,13 @@ fun DropDownHints(
     var textFieldValue by remember { mutableStateOf("") }
     var guessedLetter by remember { mutableStateOf("") }
     var checkInput by remember { mutableStateOf(false) }
-    var showToast by remember { mutableStateOf(true) }
     var showDialog by remember { mutableStateOf(false) } // State for dialog visibility
     var submitted by remember { mutableStateOf(false) } // State to track if the user has submitted their guess.
-    var nextClicked by remember { mutableStateOf(true) }
+    var nextClicked by remember { mutableStateOf(false) }
+    var isEnable by remember { mutableStateOf(true) }
+
 
     correctAnswer = false
-
-
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -398,32 +398,80 @@ fun DropDownHints(
                         horizontalArrangement = Arrangement.Center,
                         modifier = Modifier.fillMaxWidth()
                     ){
-
-                        Button(
+                        Column(
                             modifier = Modifier.padding(16.dp),
-                            onClick = {
-                                onNextClicked()
-                                wrongGuesses=1
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Button(
+                                modifier = Modifier.padding(16.dp),
+                                onClick = {
+                                    isEnable = false
+                                    onNextClicked()
+                                    wrongGuesses=1
+                                    Log.d("NextButtonToggled", "Next button clicked")
+                                    checkInput = false
+                                },
+                                enabled = isEnable
+                                ) {
+                                Text(text =  "Click Here to Start") // Change the button text based on the submitted state
+                            }
 
-                                Log.d("NextButtonToggled", "Next button clicked")
-                                checkInput = false
-                            }) {
-                            Text(text =  "Next") // Change the button text based on the submitted state
 
+
+                            if (wrongGuesses >= 3 ){
+                                nextClicked = true
+                                textFieldValue = " "
+
+                            }
+                            Button(
+                                modifier = Modifier.padding(16.dp),
+                                enabled = !isEnable,
+                                onClick = {
+//                    Log.d("DropdownExample", "Submit button clicked")
+
+                                    submitted = true
+
+                                    if (nextClicked ){
+                                        nextClicked = !nextClicked
+                                        onNextClicked()
+                                        wrongGuesses=1
+                                        checkInput = false
+
+
+                                        Log.d("NextButtonToggled", "Next button clicked")
+                                        Log.d("Next Button","Working")
+                                        Log.d("NextButtonToggled", "Next button clicked")
+                                    }
+                                    else{
+                                        guessedLetter = textFieldValue
+                                        textFieldValue = ""
+                                        checkInput = true
+                                        showDialog =true
+                                    }
+
+                                }) {
+                                Text(text = if (nextClicked) "Next" else "Submit") // Change the button text based on the submitted state
+                            }
                         }
 
-                        Button(
-                            modifier = Modifier.padding(16.dp),
-                            onClick = {
-                                guessedLetter = textFieldValue
-                                textFieldValue = ""
-                                checkInput = true
-                                showDialog =true
 
 
-                            }) {
-                            Text(text = "Submit")
-                        }
+//                        Button(
+//                            modifier = Modifier.padding(16.dp),
+//                            onClick = {
+//                                guessedLetter = textFieldValue
+//                                textFieldValue = ""
+//                                checkInput = true
+//                                showDialog =true
+//
+//
+//                            }) {
+//                            Text(text = "Submit")
+//                        }
+
+
+
                     }
 
 
