@@ -1,15 +1,16 @@
 package com.example.cw
 
-import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -17,7 +18,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.cw.ui.theme.CwTheme
 import kotlin.random.Random
@@ -33,16 +33,18 @@ class GuessFlag : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background
                 ) {
-                    var showDialog  by remember { mutableStateOf(false) }
-                    val (randomCountryKey, randomFlagName, imageIdAndNameList) = rememberRandomIndicesAndFlag()
-                    var currentRandomIndices by remember { mutableStateOf(listOf(0,1,2)) }
+                    var showDialog  by rememberSaveable { mutableStateOf(false) }
+                    val (_, _, imageIdAndNameList) = rememberRandomIndicesAndFlag()
+                    var currentRandomIndices by rememberSaveable { mutableStateOf(listOf(0,1,2)) }
                     GuessFlagContent(
                         showDialog = showDialog,
                         onShowDialogChange = { showDialog = it },
-                        randomFlagName = randomFlagName,
                         imageIdAndNameList = imageIdAndNameList,
                         onNextButtonClick = {
+
                             currentRandomIndices = List(3) { Random.nextInt(imageIdAndNameList.size) }
+                            Log.d("Checking current random","$currentRandomIndices")
+
                         },
                         currentRandomIndices = currentRandomIndices
 
@@ -56,9 +58,6 @@ class GuessFlag : ComponentActivity() {
 }
 
 
-
-
-
 var nextButtonVisible = false
 
 
@@ -67,25 +66,21 @@ var nextButtonVisible = false
 fun GuessFlagContent(
     showDialog: Boolean,
     onShowDialogChange: (Boolean) -> Unit,
-    randomFlagName: String,
     imageIdAndNameList: List<Pair<Int, String>>,
     onNextButtonClick: () -> Unit ,// Callback for handling Next button click
     currentRandomIndices:List<Int>
 
 ) {
+    var randomFlagName1 by rememberSaveable { mutableStateOf("") }
     Log.d(" GuessFlagContent","This is Working")
-    val context = LocalContext.current
+    LocalContext.current
 
+    if(currentRandomIndices.isNotEmpty() && !showDialog){
+        val randomIndex = (currentRandomIndices.indices).random()
+        val (_, flagName)= imageIdAndNameList[currentRandomIndices[randomIndex]]
+         randomFlagName1 = flagName
+    }
 
-
-//    // Get random flag details
-//    val (randomCountryKey, randomFlagName) = countryMap.entries.toList()[randomIndices[0]]
-//    val imageIdAndNameList = randomIndices.map { index ->
-//        val (countryKey, _) = countryMap.entries.toList()[index]
-//        val flagName = countryMap[countryKey].toString()
-//        val imageId = imageResourceIds[index]
-//        Pair(imageId, flagName)
-//    }
 
 
     Column(
@@ -93,39 +88,52 @@ fun GuessFlagContent(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(text = "Guess the Flag!")
-        Button(onClick = {
-            onNextButtonClick()
-            nextButtonVisible = false },
-            enabled =nextButtonVisible,
-            modifier = Modifier.padding(top =6.dp )) {
-            Text(text = "Next")
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ){
+            item {
+                Text(text = "Guess Flag by Country!")
+                Button(onClick = {
+                    onNextButtonClick()
+                    submitClicked = false
+                    nextButtonVisible = false },
+                    enabled =nextButtonVisible,
+                    modifier = Modifier.padding(top =6.dp )) {
+                    Text(text = "Next")
+                }
+
+                // Display the correct Flag Name
+                if (!submitClicked) {
+                    Text(text = randomFlagName1)
+                }
+
+                if (!submitClicked){
+
+                    // Display buttons for each flag using the current random indices
+                    currentRandomIndices.forEach { index ->
+                        val (imageId, flagName) = imageIdAndNameList[index]
+                        FlagButton(
+                            imageId = imageId,
+                            flagName = flagName,
+                            onShowDialogChange = onShowDialogChange
+                        )
+                    }
+                }
+            }
+
         }
 
-        // Display the correct Flag Name
-        if (randomFlagName != null) {
-            Text(text = randomFlagName)
-        }
-
-        // Display buttons for each flag using the current random indices
-        currentRandomIndices.forEach { index ->
-            val (imageId, flagName) = imageIdAndNameList[index]
-            FlagButton(
-                imageId = imageId,
-                flagName = flagName,
-                onShowDialogChange = onShowDialogChange
-            )
-        }
 
     }
 
     // Show dialog if necessary
     if (showDialog) {
-        val rightAnswer = randomFlagName == selectedFlag
-        Log.d("Selected Flag","Selected Flag $selectedFlag  right answer: $randomFlagName")
-        val message = if (rightAnswer) "You Have Selected The Correct Flag for the Country: " else "You Have Selected The Wrong Flag for the Country: "
+        val rightAnswer = randomFlagName1 == selectedFlag
+        Log.d("Selected Flag","Selected Flag $selectedFlag  right answer: $randomFlagName1")
+        val message = if (rightAnswer) "You Have Selected The Correct Flag for the Country: " else "You Have Selected The Flag for the Country: "
         ShowDialogFlag(
-            context = context,
             result = if (rightAnswer) "Correct" else "Wrong",
             message = message,
             correctCountryName = selectedFlag,
@@ -135,6 +143,8 @@ fun GuessFlagContent(
     }
 }
 var selectedFlag=""
+var submitClicked = false
+
 @Composable
 fun FlagButton(
     imageId: Int,
@@ -148,8 +158,11 @@ fun FlagButton(
             selectedFlag = flagName
             onShowDialogChange(true)
             nextButtonVisible = true
+            submitClicked = true
+
 
         },
+        enabled= !submitClicked,
         modifier = Modifier
             .size(200.dp)
             .padding(16.dp)
@@ -166,7 +179,6 @@ fun FlagButton(
 
 @Composable
 fun ShowDialogFlag(
-    context: Context,
     result: String,
     message: String,
     correctCountryName: String,
@@ -174,7 +186,7 @@ fun ShowDialogFlag(
     correctAnswer: Boolean
 ) {
     Log.d("ShowDialogFlag","Running")
-    val backgroundColor = if (correctAnswer) Color.Green else Color.Red
+    if (correctAnswer) Color.Green else Color.Red
     val textColor = if (correctAnswer) Color.Green else Color.Red
     AlertDialog(
         onDismissRequest = onDismissRequest,
@@ -182,8 +194,8 @@ fun ShowDialogFlag(
             Text(text = "Result")
         },
         text = {
-            Row() {
-                Column() {
+            Row {
+                Column {
                     Text(text = result, color = textColor)
                     Text(text = message)
                     Text(text = correctCountryName, color = Color.Blue)
@@ -193,7 +205,6 @@ fun ShowDialogFlag(
         confirmButton = {
             Button(
                 onClick = {
-                    // Call the provided onDismissRequest function to dismiss the dialog
                     onDismissRequest()
                     Log.d("OnClick", "Function is Called")
                 }
@@ -209,7 +220,7 @@ fun ShowDialogFlag(
 fun rememberRandomIndicesAndFlag(): Triple<String, String, List<Pair<Int, String>>> {
     Log.d("rememberRandomIndices()","Running")
     val context = LocalContext.current
-    val countryMap = remember { mutableMapOf<String, String>() }
+    val countryMap = rememberSaveable { mutableMapOf<String, String>() }
     readJson(context, countryMap)
 
     // List of image resource IDs
@@ -475,7 +486,7 @@ fun rememberRandomIndicesAndFlag(): Triple<String, String, List<Pair<Int, String
 //    // Generate random indices
 //    val randomIndices = remember{ List(100) { Random.nextInt(imageResourceIds.size) }}
     // Generate a list of random indices
-    val randomIndices = remember {
+    val randomIndices = rememberSaveable {
         List(100) { Random(seed = System.currentTimeMillis() + it).nextInt(imageResourceIds.size) }
     }
 

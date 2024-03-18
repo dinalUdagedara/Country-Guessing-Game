@@ -11,11 +11,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.cw.ui.theme.CwTheme
 import kotlin.random.Random
@@ -32,9 +32,9 @@ class AdvancedLevel : ComponentActivity() {
                     horizontalAlignment = Alignment.CenterHorizontally
 
                 ){
-                    var showDialog  by remember { mutableStateOf(false) }
+                    var showDialog  by rememberSaveable  { mutableStateOf(false) }
                     val (randomCountryKey, randomFlagName, imageIdAndNameList) = rememberRandomIndicesAndFlag()
-                    var currentRandomIndices by remember { mutableStateOf(listOf(0,1,2)) }
+                    var currentRandomIndices by rememberSaveable  { mutableStateOf(listOf(0,1,2)) }
                     AdvancedLevelContent(
                         showDialog = showDialog,
                         onShowDialogChange = { showDialog = it },
@@ -69,41 +69,37 @@ fun AdvancedLevelContent(
     Log.d(" GuessFlagContent","This is Working")
     val context = LocalContext.current
 
-    var textFieldValue_1 by remember { mutableStateOf("") }
-    var textFieldValue_2 by remember { mutableStateOf("") }
-    var textFieldValue_3 by remember { mutableStateOf("") }
+    var textFieldValue_1 by rememberSaveable { mutableStateOf("") }
+    var textFieldValue_2 by rememberSaveable { mutableStateOf("") }
+    var textFieldValue_3 by rememberSaveable { mutableStateOf("") }
 
-    var submitCount by remember { mutableStateOf(0) }
+    var submitCount by rememberSaveable { mutableStateOf(0) }
 
     // Define a variable to control the enabled state of the text fields
-    var isFieldsEnabled by remember { mutableStateOf(true) }
+    var isFieldsEnabled by rememberSaveable { mutableStateOf(true) }
 
 
-    var textB_1Submitted by remember { mutableStateOf(false) }
-    var textB_1 by remember { mutableStateOf(false) }
 
-    var textB_2Submitted by remember { mutableStateOf(false) }
-    var textB_2 by remember { mutableStateOf(false) }
-
-    var textB_3Submitted by remember { mutableStateOf(false) }
-    var textB_3 by remember { mutableStateOf(false) }
-
-    var allCorrect by remember { mutableStateOf(false) }
+    var textB_1 by rememberSaveable { mutableStateOf(false) }
 
 
-    var textSubmitted by remember { mutableStateOf(false) }
-    var submitted by remember { mutableStateOf(false) } // State to track if the user has submitted their guess
-    var nextClicked by remember { mutableStateOf(true) }
+    var textB_2 by rememberSaveable { mutableStateOf(false) }
 
 
-//    // Get random flag details
-//    val (randomCountryKey, randomFlagName) = countryMap.entries.toList()[randomIndices[0]]
-//    val imageIdAndNameList = randomIndices.map { index ->
-//        val (countryKey, _) = countryMap.entries.toList()[index]
-//        val flagName = countryMap[countryKey].toString()
-//        val imageId = imageResourceIds[index]
-//        Pair(imageId, flagName)
-//    }
+    var textB_3 by rememberSaveable { mutableStateOf(false) }
+
+    var allCorrect by rememberSaveable { mutableStateOf(false) }
+
+
+    var textSubmitted by rememberSaveable { mutableStateOf(false) }
+    var submitted by rememberSaveable { mutableStateOf(false) } // State to track if the user has submitted their guess
+    var nextClicked by rememberSaveable { mutableStateOf(false) }
+    
+    var marks by rememberSaveable  { mutableStateOf(0) }
+    var attempts by rememberSaveable  { mutableStateOf(0) }
+    var wrongCounts by rememberSaveable  { mutableStateOf(0) }
+
+
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -117,31 +113,7 @@ fun AdvancedLevelContent(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(text = "Guess the Flag!")
-//                Button(onClick = {
-//                    onNextButtonClick()
-//                    Log.d("Next Button","Working")
-//                },
-//                    modifier = Modifier.padding(top =6.dp )) {
-//                    Text(text = "Next")
-//                }
-
-
-
-//                // Display buttons for each flag using the current random indices
-//                currentRandomIndices.forEach { index ->
-//                    val (imageId, flagName) = imageIdAndNameList[index]
-//                    FlagButton(
-//                        imageId = imageId,
-//                        flagName = flagName,
-//                        onShowDialogChange = onShowDialogChange
-//                    )
-//                    TextField(value = textFieldValue,
-//                        onValueChange = {
-//                            if (it.length <= 1) {
-//                                textFieldValue = it
-//                            }
-//                        } )
-//                }
+                Text(text = "$marks/$attempts")
 
 //  Flag 1
                 val (imageId_1,flagName_1) = imageIdAndNameList[currentRandomIndices[0]]
@@ -159,7 +131,7 @@ fun AdvancedLevelContent(
                         backgroundColor = if (textB_1) Color.Gray else Color.White, // Change the background color based on the enabled state
                         textColor = (if (textB_1 && textSubmitted){Color.Green} else if (!textB_1 && textSubmitted) {Color.Red} else {
                             Color.Black
-                        }) as Color  // Change the text color if needed
+                        })
                     ),
                     )
 
@@ -212,31 +184,24 @@ fun AdvancedLevelContent(
                 if (randomFlagName != null) {
                     Text(text = "1: $flagName_1, 2: $flagName_2, 3: $flagName_3")
                 }
-//
-//                Button(onClick = {
-//                    allCorrect = flagName_1 == textFieldValue_1 && flagName_2 == textFieldValue_2 && flagName_3 == textFieldValue_3
-//                    submitCount = 1
-//                    Log.d("ButtonClick","correct: $randomFlagName selected: $flagName_1")
-//                    if (allCorrect){
-//                        Log.d("Submit","All Correct Working")
-//                        isFieldsEnabled = false
-//                        onShowDialogChange (true)
-//                    }
-//                }) {
-//                    Text(text = "Submit")
-//                }
 
+                Log.d("Next button Selection ","OutSide")
+                if (wrongCounts >= 3 || allCorrect){
+                    nextClicked = true
+                    wrongCounts = 0
+                    Log.d("Next button Selection ","Working")
+                }
 
 
                 Button(
                     modifier = Modifier.padding(16.dp),
                     onClick = {
-//                    Log.d("DropdownExample", "Submit button clicked")
+
 
 
                         submitted = true
 
-                        nextClicked = !nextClicked
+//                        nextClicked = !nextClicked
 
                         if (nextClicked ){
                             textSubmitted = false
@@ -258,11 +223,13 @@ fun AdvancedLevelContent(
 
                             Log.d("Next Button","Working")
                             Log.d("NextButtonToggled", "Next button clicked")
+                            nextClicked = false
 
                         }
                         else{
 
                             textSubmitted = true
+                            attempts += 3
 
                             allCorrect = flagName_1 == textFieldValue_1 && flagName_2 == textFieldValue_2 && flagName_3 == textFieldValue_3
 
@@ -272,18 +239,25 @@ fun AdvancedLevelContent(
                             if (allCorrect){
                                 Log.d("Submit","All Correct Working")
                                 isFieldsEnabled = false
+                                wrongCounts = 0
+                            }else{
+                                wrongCounts++
+                                Log.d("wrong Count","Count:$wrongCounts")
                             }
                             if (flagName_1 == textFieldValue_1){
                                 Log.d("Answer 1 ","Correct")
                                 textB_1 = true
+                                marks++
                             }
                             if (flagName_2 == textFieldValue_2){
                                 Log.d("Answer 2","Correct")
                                 textB_2 = true
+                                marks++
                             }
                             if (flagName_3 == textFieldValue_3){
                                 Log.d("Answer 3","Correct")
                                 textB_3 = true
+                                marks++
                             }
                             onShowDialogChange (true)
                             Log.d("SubmitButtonToggled", "Submit button clicked")
@@ -292,7 +266,7 @@ fun AdvancedLevelContent(
                         }
 
                     }) {
-                    Text(text = if (submitted && !nextClicked) "Next" else "Submit") // Change the button text based on the submitted state
+                    Text(text = if (submitted && nextClicked) "Next" else "Submit") // Change the button text based on the submitted state
                 }
 
 
@@ -317,8 +291,7 @@ fun AdvancedLevelContent(
 
 
             ShowDialogFlag(
-                context = context,
-                result = "All Correct",
+                result = "Congratulations",
                 message = message,
                 correctCountryName = selectedFlag,
                 onDismissRequest = { onShowDialogChange(false) },
@@ -328,12 +301,11 @@ fun AdvancedLevelContent(
         if (!allCorrect){
             Log.d("Wrong Answer","Working")
 
-            val message =  "Wrong Answers"
+            val message =  "Your Response Consist Wrong Answers"
 
 
             ShowDialogFlag(
-                context = context,
-                result = "Wrong",
+                result = "Try Again",
                 message = message,
                 correctCountryName = selectedFlag,
                 onDismissRequest = { onShowDialogChange(false) },

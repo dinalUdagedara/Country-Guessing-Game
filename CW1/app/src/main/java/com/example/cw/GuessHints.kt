@@ -6,10 +6,12 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -48,7 +50,7 @@ var correctAnswer = false
 @Composable
 fun GuessHintsContent() {
     val context = LocalContext.current
-    val countryMap = remember { mutableMapOf<String,String>() }
+    val countryMap = rememberSaveable { mutableMapOf<String,String>() }
 
     readJson(context, countryMap)
 
@@ -310,42 +312,43 @@ fun GuessHintsContent() {
         R.drawable.zw
     )
 
-    var randomCountryKey by remember { mutableStateOf("") }
+    var randomCountryKey by rememberSaveable { mutableStateOf("") }
     // Generate a random index
-    var randomIndex by remember { mutableStateOf(Random(seed = System.currentTimeMillis()).nextInt(0, imageResourceIds.size)) }
+    var randomIndex by rememberSaveable { mutableStateOf(Random(seed = System.currentTimeMillis()).nextInt(0, imageResourceIds.size)) }
     val randomImagePainter: Painter = painterResource(id = imageResourceIds[randomIndex])
 
+        LazyColumn {
+            item {  Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(text = "Guess Country Letter by Letter!")
 
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(text = "Guess the Country!")
+                Box(
+                    modifier = Modifier.size(200.dp),
+                    contentAlignment = Alignment.Center
+                ){
+                    Image(
+                        painter = randomImagePainter,
+                        contentDescription = "Random Image",
+                        modifier = Modifier
+                            .size(200.dp)
+                            .clip(shape = RoundedCornerShape(8.dp))
+                    )
+                }
 
-        Box(
-            modifier = Modifier.size(200.dp),
-            contentAlignment = Alignment.Center
-        ){
-            Image(
-                painter = randomImagePainter,
-                contentDescription = "Random Image",
-                modifier = Modifier
-                    .size(200.dp)
-                    .clip(shape = RoundedCornerShape(8.dp))
-            )
+                DropDownHints(
+                    countryMap = countryMap,
+                    randomCountryKey = randomCountryKey,
+                    onNextClicked = {
+                        randomIndex = Random(seed = System.currentTimeMillis()).nextInt(0, imageResourceIds.size)
+                        randomCountryKey = countryMap.keys.toList()[randomIndex]
+                    }
+                )
+            } }
         }
-
-        DropDownHints(
-            countryMap = countryMap,
-            randomCountryKey = randomCountryKey,
-            onNextClicked = {
-                randomIndex = Random.nextInt(0, imageResourceIds.size)
-                randomCountryKey = countryMap.keys.toList()[randomIndex]
-            }
-        )
     }
-}
 
 @Composable
 fun DropDownHints(
@@ -354,13 +357,13 @@ fun DropDownHints(
     onNextClicked: () -> Unit
 ) {
     val context = LocalContext.current
-    var textFieldValue by remember { mutableStateOf("") }
-    var guessedLetter by remember { mutableStateOf("") }
-    var checkInput by remember { mutableStateOf(false) }
-    var showDialog by remember { mutableStateOf(false) } // State for dialog visibility
-    var submitted by remember { mutableStateOf(false) } // State to track if the user has submitted their guess.
-    var nextClicked by remember { mutableStateOf(false) }
-    var isEnable by remember { mutableStateOf(true) }
+    var textFieldValue by rememberSaveable { mutableStateOf("") }
+    var guessedLetter by rememberSaveable { mutableStateOf("") }
+    var checkInput by rememberSaveable { mutableStateOf(false) }
+    var showDialog by rememberSaveable { mutableStateOf(false) } // State for dialog visibility
+    var submitted by rememberSaveable { mutableStateOf(false) } // State to track if the user has submitted their guess.
+    var nextClicked by rememberSaveable { mutableStateOf(false) }
+    var isEnable by rememberSaveable { mutableStateOf(true) }
 
 
     correctAnswer = false
@@ -382,6 +385,7 @@ fun DropDownHints(
                 ) {
                     TextField(
                         value = textFieldValue,
+                        enabled = !nextClicked && !isEnable,
                         onValueChange = {
                             if (it.length <= 1) {
                                 textFieldValue = it
@@ -432,7 +436,7 @@ fun DropDownHints(
 
                                     submitted = true
 
-                                    if (nextClicked ){
+                                    if (nextClicked){
                                         nextClicked = !nextClicked
                                         onNextClicked()
                                         wrongGuesses=1
@@ -455,67 +459,7 @@ fun DropDownHints(
                             }
                         }
 
-
-
-//                        Button(
-//                            modifier = Modifier.padding(16.dp),
-//                            onClick = {
-//                                guessedLetter = textFieldValue
-//                                textFieldValue = ""
-//                                checkInput = true
-//                                showDialog =true
-//
-//
-//                            }) {
-//                            Text(text = "Submit")
-//                        }
-
-
-
                     }
-
-
-
-
-//         Combining Two Buttons into One
-//                    Button(
-//                        modifier = Modifier.padding(16.dp),
-//                        onClick = {
-////                    Log.d("DropdownExample", "Submit button clicked")
-//
-//
-//                            submitted = true
-//
-//                            nextClicked = !nextClicked
-//
-//                            if (nextClicked ){
-//                                submitted = false
-//                                onNextClicked()
-//                                wrongGuesses=1
-//
-//                                Log.d("NextButtonToggled", "Next button clicked")
-//                                checkInput = false
-//                                Log.d("NextButtonToggled", "Next button clicked")
-//
-//                            }
-//                            else{
-//
-//                                guessedLetter = textFieldValue
-//                                textFieldValue = ""
-//                                checkInput = true
-//                                showDialog =true
-//                                Log.d("SubmitButtonToggled", "Submit button clicked")
-//
-//
-//                            }
-//
-//                        }) {
-//                        Text(text = if (submitted && !nextClicked) "Next" else "Submit") // Change the button text based on the submitted state
-//
-//                    }
-//
-//
-
 
 
                     if(showDialog) {
@@ -523,14 +467,17 @@ fun DropDownHints(
                             countryMap[randomCountryKey]?.let {
                                 ShowDialog(
 
-                                    context = context,
                                     result = "CORRECT!",
                                     message = "Congratulations You have Guessed the Correct Country which is:",
                                     correctCountryName = it,
-                                    onDismissRequest = { showDialog = false },
+                                    onDismissRequest = {
+                                        showDialog = false
+                                        nextClicked = true
+                                                       },
                                     correctAnswer = correctAnswer
                                 )
                             }
+
 
                         }
                     }
@@ -548,7 +495,6 @@ fun DropDownHints(
                     countryMap[randomCountryKey]?.let {
                         ShowDialog(
 
-                            context = context,
                             result = "Wrong!",
                             message = "You have Ran out of your chances and the Correct Country is:",
                             correctCountryName = it,
@@ -571,7 +517,7 @@ fun CheckChar(userInput: String, correctCountry: String?) {
     val lowercaseUserInput = userInput.toLowerCase()
     val lowercaseCorrectCountryName = correctCountryName.toLowerCase()
 
-    val guessedChars = remember { mutableSetOf<Char>() }
+    val guessedChars = rememberSaveable { mutableSetOf<Char>() }
 
     // Add the newly guessed character to the set
     if (userInput.isNotEmpty()) {

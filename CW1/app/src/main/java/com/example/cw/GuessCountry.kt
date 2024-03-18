@@ -1,10 +1,8 @@
 package com.example.cw
 
 import android.content.Context
-import android.content.res.Resources
 import android.os.Bundle
 import android.util.Log
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
@@ -12,9 +10,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -22,15 +20,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.cw.ui.theme.CwTheme
-import java.io.InputStream
-import java.util.*
 import kotlin.random.Random
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
-import kotlin.math.log
 
 class GuessCountry : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -55,8 +49,7 @@ class GuessCountry : ComponentActivity() {
 @Composable
 fun GuessCountryContent() {
     val context = LocalContext.current
-    val countryMap = remember { mutableMapOf<String,String>() }
-    var submitted by remember { mutableStateOf(false) } // State to track if the user has submitted their guess
+    val countryMap = rememberSaveable{ mutableMapOf<String,String>() }
 
 
     readJson(context,countryMap)
@@ -324,21 +317,19 @@ fun GuessCountryContent() {
     )
 
     // State to hold the selected country key
-    var randomCountryKey by remember { mutableStateOf("") }
+    var randomCountryKey by rememberSaveable { mutableStateOf("") }
+
 
 
     // Generate a random index
-//    var randomIndex by remember { mutableStateOf(Random.nextInt(0, imageResourceIds.size)) }
-    // Generate a random index
-    var randomIndex by remember { mutableStateOf(Random(seed = System.currentTimeMillis()).nextInt(0, imageResourceIds.size)) }
+    var randomIndex by rememberSaveable { mutableStateOf(Random(seed = System.currentTimeMillis()).nextInt(0, imageResourceIds.size)) }
 
 
 
 
     // Get the painter for the randomly selected image
     val randomImagePainter: Painter = painterResource(id = imageResourceIds[randomIndex])
-//    randomIndex = Random.nextInt(0, imageResourceIds.size)
-//    randomCountryKey = countryMap.keys.toList()[randomIndex]
+
 
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -361,20 +352,14 @@ fun GuessCountryContent() {
             )
         }
 
-//        Button(onClick = {
-//            randomIndex = (randomIndex + 1) % imageResourceIds.size
-//            randomCountryKey = countryMap.keys.toList()[randomIndex]
-//        }) {
-//            Text(text = "Next")
-//
-//        }
+
         DropdownExample(
             countryMap = countryMap,
             randomCountryKey = randomCountryKey,
             onNextClicked = {
                 //Reset the submitted state and genrate a new random index and country key
 //                submitted = false
-                randomIndex = Random.nextInt(0, imageResourceIds.size)
+                randomIndex = Random(seed = System.currentTimeMillis()).nextInt(0, imageResourceIds.size)
                 randomCountryKey = countryMap.keys.toList()[randomIndex]
             }
         )
@@ -399,13 +384,6 @@ fun readJson(context: Context, countryMap: MutableMap<String, String>) {
         }
    }
 
-//
-//fun readJson(resources: Resources, resourceId: Int): JSONArray {
-//    val inputStream: InputStream = resources.openRawResource(resourceId)
-//    val jsonString = inputStream.bufferedReader().use { it.readText() }
-//    return JSONArray(jsonString)
-//}
-//
 
 @Composable
 fun DropdownExample(
@@ -413,13 +391,14 @@ fun DropdownExample(
     randomCountryKey: String,
     onNextClicked:()-> Unit
 ) {
-    val context = LocalContext.current
-    var selectedOption by remember { mutableStateOf("Click Here to Select") }
-    var selectedCountryKey by remember { mutableStateOf("") }
-    var showToast by remember { mutableStateOf(false) }
-    var submitted by remember { mutableStateOf(false) } // State to track if the user has submitted their guess
-    var nextClicked by remember { mutableStateOf(true) }
-    var isEnable by remember { mutableStateOf(true) }
+    LocalContext.current
+    var selectedOption by rememberSaveable { mutableStateOf("Click Here to Select") }
+    var selectedCountryKey by rememberSaveable { mutableStateOf("") }
+    var showToast by rememberSaveable { mutableStateOf(false) }
+    var submitted by rememberSaveable { mutableStateOf(false) } // State to track if the user has submitted their guess
+    var nextClicked by rememberSaveable { mutableStateOf(true) }
+    var isEnable by rememberSaveable { mutableStateOf(true) }
+
 
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -509,7 +488,6 @@ fun DropdownExample(
                 Log.d("ShowToast Correct Country ", "Working Fine")
                 ShowDialog(
 
-                    context = context,
                     result = "CORRECT!",
                     message = "Congratulations You have Selected the Correct Answer which is:",
                     correctCountryName= correctCountry,
@@ -521,7 +499,6 @@ fun DropdownExample(
             if (correctCountry != null) {
                 Log.d("ShowToast Wrong Country ", "Working Fine")
                 ShowDialog(
-                    context = context,
                     result = "Wrong!",
                     message = "The Selected Country is $selectedOption, but correct Country is: ",
                     correctCountryName= correctCountry,
@@ -560,24 +537,16 @@ fun checkSelectedCountry(selectedCountryKey: String, randomCountryKey: String, c
 }
 
 
-//@Composable
-//fun ShowToast(context: Context, message: String) {
-//    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-//}
-
-
-
 
 @Composable
 fun ShowDialog(
-    context: Context,
     result: String,
     message: String,
     correctCountryName: String,
     onDismissRequest: () -> Unit, // Function to handle dialog dismissal
     correctAnswer: Boolean
 ) {
-    val backgroundColor = if (correctAnswer) Color.Green else Color.Red
+    if (correctAnswer) Color.Green else Color.Red
     val textColor = if (correctAnswer) Color.Green else Color.Red
     AlertDialog(
         onDismissRequest = onDismissRequest,
@@ -585,8 +554,8 @@ fun ShowDialog(
             Text(text = "Result")
         },
         text = {
-            Row() {
-                Column() {
+            Row {
+                Column {
                     Text(text = result, color = textColor)
                     Text(text = message)
                     Text(text = correctCountryName, color = Color.Blue)
@@ -607,3 +576,4 @@ fun ShowDialog(
         }
     )
 }
+
