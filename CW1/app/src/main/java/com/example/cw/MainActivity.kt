@@ -3,6 +3,7 @@ package com.example.cw
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.RoundedCorner
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -35,6 +36,8 @@ class MainActivity : ComponentActivity() {
                 val expanded = remember { mutableStateOf(false) }
                 val extraPadding = if (expanded.value) 48.dp else 0.dp
 
+                var timerSwitch =  remember { mutableStateOf(false) }
+
                 Surface(
 
                     modifier = Modifier.fillMaxSize(),
@@ -52,6 +55,16 @@ class MainActivity : ComponentActivity() {
 
 
                             ) {
+
+                            Switch(
+                                checked = timerSwitch.value,
+                                onCheckedChange = { isChecked ->
+                                    timerSwitch.value = isChecked
+
+                                    Log.d("timerSwitch","${timerSwitch.value}")
+                                },
+                                modifier = Modifier.padding(16.dp) // Add padding for spacing
+                            )
                             Surface(
 
 
@@ -79,6 +92,7 @@ class MainActivity : ComponentActivity() {
                                 }
                                 Button(onClick = {
                                     val navigate = Intent(this@MainActivity, GuessCountry::class.java)
+                                    navigate.putExtra("Timer",timerSwitch.value)
                                     startActivity(navigate)
                                 },
                                     modifier = Modifier.padding(10.dp),
@@ -119,6 +133,7 @@ class MainActivity : ComponentActivity() {
                                     }
                                     Button(onClick = {
                                         val navigate = Intent(this@MainActivity, GuessHints::class.java)
+                                        navigate.putExtra("Timer",timerSwitch.value)
                                         startActivity(navigate)
                                     },
                                         modifier = Modifier.padding(10.dp),
@@ -161,6 +176,7 @@ class MainActivity : ComponentActivity() {
                                     }
                                     Button(onClick = {
                                         val navigate = Intent(this@MainActivity, GuessFlag::class.java)
+                                        navigate.putExtra("Timer",timerSwitch.value)
                                         startActivity(navigate)
                                     },
                                         modifier = Modifier.padding(10.dp),
@@ -180,10 +196,7 @@ class MainActivity : ComponentActivity() {
                             }
 
 
-
-
                             Surface(
-
 
                                 modifier = Modifier
                                     .fillMaxWidth(),
@@ -205,6 +218,7 @@ class MainActivity : ComponentActivity() {
                                     }
                                     Button(onClick = {
                                         val navigate = Intent(this@MainActivity, AdvancedLevel::class.java)
+                                        navigate.putExtra("Timer",timerSwitch.value)
                                         startActivity(navigate)
                                     },
                                         modifier = Modifier.padding(10.dp),

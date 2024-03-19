@@ -36,8 +36,8 @@ class GuessHints : ComponentActivity() {
                     horizontalAlignment = Alignment.CenterHorizontally
 
                 ){
-
-                    GuessHintsContent()
+                    val timerSwitch = intent.getBooleanExtra("Timer",false)
+                    GuessHintsContent(timerSwitch)
                 }
             }
         }
@@ -48,7 +48,8 @@ var wrongGuesses = 1
 var correctAnswer = false
 
 @Composable
-fun GuessHintsContent() {
+fun GuessHintsContent(timerSwitch:Boolean) {
+    Log.d("TImerSwitch ","$timerSwitch")
     val context = LocalContext.current
     val countryMap = rememberSaveable { mutableMapOf<String,String>() }
 
@@ -318,7 +319,10 @@ fun GuessHintsContent() {
     val randomImagePainter: Painter = painterResource(id = imageResourceIds[randomIndex])
 
         LazyColumn {
-            item {  Column(
+            item {
+
+
+                Column(
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
@@ -344,7 +348,8 @@ fun GuessHintsContent() {
                     onNextClicked = {
                         randomIndex = Random(seed = System.currentTimeMillis()).nextInt(0, imageResourceIds.size)
                         randomCountryKey = countryMap.keys.toList()[randomIndex]
-                    }
+                    },
+                    timerSwitch
                 )
             } }
         }
@@ -354,7 +359,8 @@ fun GuessHintsContent() {
 fun DropDownHints(
     countryMap: Map<String, String>,
     randomCountryKey: String,
-    onNextClicked: () -> Unit
+    onNextClicked: () -> Unit,
+    timerSwitch: Boolean
 ) {
     val context = LocalContext.current
     var textFieldValue by rememberSaveable { mutableStateOf("") }
@@ -367,10 +373,28 @@ fun DropDownHints(
 
 
     correctAnswer = false
+
+
+
+
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+
+        if (timerSwitch){
+            TimerBegin(
+                onFinish = {
+                    guessedLetter = textFieldValue
+                    textFieldValue = ""
+                    checkInput = true
+                    showDialog =true
+
+                }
+            )
+        }
+
+
         TextButton(onClick = { /* Handle click */ }) {
             countryMap[randomCountryKey]?.let { Text(text = it) }
         }
@@ -486,8 +510,11 @@ fun DropDownHints(
 
             if (checkInput && wrongGuesses<3) {
                 val correctCountryName = countryMap[randomCountryKey]
+                Log.d("correctCountryName","$countryMap")
+                Log.d("countryKey","$randomCountryKey")
                 CheckChar(guessedLetter, correctCountryName)
                 Log.d("if checkInput", " $correctCountryName input: $guessedLetter ")
+                
             } else if (checkInput && wrongGuesses >= 3){
                 Text(text = "Your chances ran out")
                 showDialog = true

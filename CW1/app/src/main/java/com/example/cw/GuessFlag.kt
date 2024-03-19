@@ -28,7 +28,7 @@ class GuessFlag : ComponentActivity() {
         setContent {
             CwTheme {
 
-
+                val timerSwitch = intent.getBooleanExtra("Timer",false)
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background
@@ -46,7 +46,8 @@ class GuessFlag : ComponentActivity() {
                             Log.d("Checking current random","$currentRandomIndices")
 
                         },
-                        currentRandomIndices = currentRandomIndices
+                        currentRandomIndices = currentRandomIndices,
+                        timerSwitch
 
                     )
                     Log.d("setContent Running","Running")
@@ -68,9 +69,27 @@ fun GuessFlagContent(
     onShowDialogChange: (Boolean) -> Unit,
     imageIdAndNameList: List<Pair<Int, String>>,
     onNextButtonClick: () -> Unit ,// Callback for handling Next button click
-    currentRandomIndices:List<Int>
+    currentRandomIndices:List<Int>,
+    timerSwitch : Boolean
+
 
 ) {
+    var timeOut by rememberSaveable {
+        mutableStateOf(false)
+    }
+
+    if (timerSwitch && !timeOut){
+        TimerBegin(
+            onFinish = {
+                onShowDialogChange(true)
+                timeOut = true
+
+            }
+        )
+    }
+
+    Log.d("TimerSwitch","$timerSwitch")
+
     var randomFlagName1 by rememberSaveable { mutableStateOf("") }
     Log.d(" GuessFlagContent","This is Working")
     LocalContext.current
@@ -130,16 +149,32 @@ fun GuessFlagContent(
 
     // Show dialog if necessary
     if (showDialog) {
-        val rightAnswer = randomFlagName1 == selectedFlag
-        Log.d("Selected Flag","Selected Flag $selectedFlag  right answer: $randomFlagName1")
-        val message = if (rightAnswer) "You Have Selected The Correct Flag for the Country: " else "You Have Selected The Flag for the Country: "
-        ShowDialogFlag(
-            result = if (rightAnswer) "Correct" else "Wrong",
-            message = message,
-            correctCountryName = selectedFlag,
-            onDismissRequest = { onShowDialogChange(false) },
-            correctAnswer = rightAnswer
-        )
+        if (timeOut){
+            Log.d("timeout","running")
+            ShowDialogFlag(
+                result = "Time Out",
+                message = "Your Time Has Ran Out...",
+                correctCountryName = "",
+                onDismissRequest = {
+                    onShowDialogChange(false)
+                    nextButtonVisible = true
+                    submitClicked = true
+                                   },
+                correctAnswer = false
+            )
+        }else{
+            val rightAnswer = randomFlagName1 == selectedFlag
+            Log.d("Selected Flag","Selected Flag $selectedFlag  right answer: $randomFlagName1")
+            val message = if (rightAnswer) "You Have Selected The Correct Flag for the Country: " else "You Have Selected The Flag for the Country: "
+            ShowDialogFlag(
+                result = if (rightAnswer) "Correct" else "Wrong",
+                message = message,
+                correctCountryName = selectedFlag,
+                onDismissRequest = { onShowDialogChange(false) },
+                correctAnswer = rightAnswer
+            )
+        }
+
     }
 }
 var selectedFlag=""

@@ -1,23 +1,26 @@
 package com.example.cw
 
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import com.example.cw.ui.theme.CwTheme
+import kotlinx.coroutines.delay
+import kotlinx.serialization.descriptors.PrimitiveKind
+import java.util.concurrent.TimeUnit
 import kotlin.random.Random
 
 
@@ -26,6 +29,7 @@ class AdvancedLevel : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             CwTheme {
+                val timerSwitch = intent.getBooleanExtra("Timer",false)
                 Column (
                     modifier = Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.Center,
@@ -42,8 +46,10 @@ class AdvancedLevel : ComponentActivity() {
                         imageIdAndNameList = imageIdAndNameList,
                         onNextButtonClick = {
                             currentRandomIndices = List(3) { Random.nextInt(imageIdAndNameList.size) }
+
                         },
-                        currentRandomIndices = currentRandomIndices
+                        currentRandomIndices = currentRandomIndices,
+                        timerSwitch
 
                     )
                     Log.d("setContent Running","Running")
@@ -63,9 +69,19 @@ fun AdvancedLevelContent(
     randomFlagName: String,
     imageIdAndNameList: List<Pair<Int, String>>,
     onNextButtonClick: () -> Unit ,// Callback for handling Next button click
-    currentRandomIndices:List<Int>
+    currentRandomIndices:List<Int>,
+    timerSwitch : Boolean
 
 ) {
+//    TimerBegin(
+//        onFinish = {
+//            onShowDialogChange(true)
+//        }
+//    )
+
+
+    Log.d("Timer Switch","$timerSwitch")
+
     Log.d(" GuessFlagContent","This is Working")
     val context = LocalContext.current
 
@@ -94,12 +110,90 @@ fun AdvancedLevelContent(
     var textSubmitted by rememberSaveable { mutableStateOf(false) }
     var submitted by rememberSaveable { mutableStateOf(false) } // State to track if the user has submitted their guess
     var nextClicked by rememberSaveable { mutableStateOf(false) }
-    
+
     var marks by rememberSaveable  { mutableStateOf(0) }
     var attempts by rememberSaveable  { mutableStateOf(0) }
     var wrongCounts by rememberSaveable  { mutableStateOf(0) }
 
+    val (imageId_1,flagName_1) = imageIdAndNameList[currentRandomIndices[0]]
+    val (imageId_2,flagName_2) = imageIdAndNameList[currentRandomIndices[1]]
+    val (imageId_3,flagName_3) = imageIdAndNameList[currentRandomIndices[2]]
 
+
+
+
+
+    if (timerSwitch){
+        TimerBegin(
+            onFinish = {
+                submitted = true
+
+                if (nextClicked ){
+                    Log.d("Timer If","Working")
+                    textSubmitted = false
+
+                    isFieldsEnabled = true
+
+                    onNextButtonClick()
+
+                    allCorrect = false
+
+
+                    textB_1 = false
+                    textB_2 = false
+                    textB_3 = false
+
+                    textFieldValue_1 = ""
+                    textFieldValue_2 = ""
+                    textFieldValue_3 = ""
+
+                    Log.d("Next Button","Working")
+                    Log.d("NextButtonToggled", "Next button clicked")
+                    nextClicked = false
+
+                }
+                else{
+                    Log.d("Else Timer","Working")
+
+                    textSubmitted = true
+                    attempts += 3
+
+                    allCorrect = flagName_1 == textFieldValue_1 && flagName_2 == textFieldValue_2 && flagName_3 == textFieldValue_3
+
+
+                    submitCount = 1
+                    Log.d("ButtonClick","correct: $randomFlagName selected: $flagName_1")
+                    if (allCorrect){
+                        Log.d("Submit","All Correct Working")
+                        isFieldsEnabled = false
+                        wrongCounts = 0
+                    }else{
+                        wrongCounts++
+                        Log.d("wrong Count","Count:$wrongCounts")
+                    }
+                    if (flagName_1 == textFieldValue_1){
+                        Log.d("Answer 1 ","Correct")
+                        textB_1 = true
+                        marks++
+                    }
+                    if (flagName_2 == textFieldValue_2){
+                        Log.d("Answer 2","Correct")
+                        textB_2 = true
+                        marks++
+                    }
+                    if (flagName_3 == textFieldValue_3){
+                        Log.d("Answer 3","Correct")
+                        textB_3 = true
+                        marks++
+                    }
+                    onShowDialogChange (true)
+                    Log.d("SubmitButtonToggled", "Submit button clicked")
+
+
+                }
+            }
+        )
+    }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -116,7 +210,7 @@ fun AdvancedLevelContent(
                 Text(text = "$marks/$attempts")
 
 //  Flag 1
-                val (imageId_1,flagName_1) = imageIdAndNameList[currentRandomIndices[0]]
+
                 FlagButton(
                     imageId = imageId_1,
                     flagName = flagName_1 ,
@@ -137,7 +231,7 @@ fun AdvancedLevelContent(
 
 
 //  Flag 2
-                val (imageId_2,flagName_2) = imageIdAndNameList[currentRandomIndices[1]]
+
                 FlagButton(
                     imageId = imageId_2,
                     flagName = flagName_2 ,
@@ -152,14 +246,14 @@ fun AdvancedLevelContent(
                         backgroundColor = if (textB_2) Color.Gray else Color.White, // Change the background color based on the enabled state
                         textColor = (if (textB_2 && textSubmitted){Color.Green} else if (!textB_2 && textSubmitted) {Color.Red} else {
                             Color.Black
-                        }) 
+                        })
                     ),
                 )
 
 
 
 //  Flag 3
-                val (imageId_3,flagName_3) = imageIdAndNameList[currentRandomIndices[2]]
+
                 FlagButton(
                     imageId = imageId_3,
                     flagName = flagName_3 ,
@@ -293,8 +387,11 @@ fun AdvancedLevelContent(
             ShowDialogFlag(
                 result = "Congratulations",
                 message = message,
-                correctCountryName = selectedFlag,
-                onDismissRequest = { onShowDialogChange(false) },
+                correctCountryName = "",
+                onDismissRequest = {
+                    onShowDialogChange(false)
+
+                                   },
                 correctAnswer = true
             )
         }
@@ -307,12 +404,68 @@ fun AdvancedLevelContent(
             ShowDialogFlag(
                 result = "Try Again",
                 message = message,
-                correctCountryName = selectedFlag,
-                onDismissRequest = { onShowDialogChange(false) },
+                correctCountryName = "",
+                onDismissRequest = {
+                    onShowDialogChange(false)
+
+                                   },
                 correctAnswer = false
             )
         }
 
 
     }
+
+
+
 }
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+fun TimerBegin(onFinish : () -> Unit) {
+    var time by rememberSaveable {
+        mutableStateOf(TimeUnit.SECONDS.toMillis(10)) // Start from 59 seconds
+    }
+    var isRunning by rememberSaveable {
+        mutableStateOf(true) // Start the timer automatically
+    }
+    var startTime by rememberSaveable {
+        mutableStateOf(System.currentTimeMillis())
+    }
+
+    Column(
+        modifier = Modifier
+            .padding(15.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = formatTime(time),
+            modifier = Modifier.padding(9.dp)
+        )
+
+        LaunchedEffect(isRunning) {
+            while (isRunning) {
+                delay(1000)
+                val elapsedTime = System.currentTimeMillis() - startTime
+                time = TimeUnit.SECONDS.toMillis(10) - elapsedTime
+                if (time <= 0) {
+                    time = 0
+                    isRunning = false
+                    onFinish()
+
+                }
+            }
+        }
+    }
+
+}
+
+
+@Composable
+fun formatTime(timeMi : Long):String{
+    val min = TimeUnit.MILLISECONDS.toMinutes(timeMi) %60
+    val sec = TimeUnit.MILLISECONDS.toSeconds(timeMi) %60
+
+    return String.format("%02d:%02d",min,sec)
+}
+

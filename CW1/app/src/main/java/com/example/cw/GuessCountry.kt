@@ -37,7 +37,8 @@ class GuessCountry : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background
                 ) {
-                    GuessCountryContent()
+                    val timerSwitch = intent.getBooleanExtra("Timer",false)
+                    GuessCountryContent(timerSwitch)
                 }
             }
 
@@ -46,8 +47,10 @@ class GuessCountry : ComponentActivity() {
 
 }
 
+
 @Composable
-fun GuessCountryContent() {
+fun GuessCountryContent(timerSwitch:Boolean) {
+    Log.d("Timer","$timerSwitch")
     val context = LocalContext.current
     val countryMap = rememberSaveable{ mutableMapOf<String,String>() }
 
@@ -331,6 +334,10 @@ fun GuessCountryContent() {
     val randomImagePainter: Painter = painterResource(id = imageResourceIds[randomIndex])
 
 
+
+
+
+
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
@@ -340,7 +347,7 @@ fun GuessCountryContent() {
 
 
         Box(
-            modifier = Modifier.size(200.dp),
+            modifier = Modifier.size(150.dp),
             contentAlignment = Alignment.Center
             ){
             Image(
@@ -361,7 +368,8 @@ fun GuessCountryContent() {
 //                submitted = false
                 randomIndex = Random(seed = System.currentTimeMillis()).nextInt(0, imageResourceIds.size)
                 randomCountryKey = countryMap.keys.toList()[randomIndex]
-            }
+            },
+            timerSwitch = timerSwitch
         )
     }
 }
@@ -389,7 +397,8 @@ fun readJson(context: Context, countryMap: MutableMap<String, String>) {
 fun DropdownExample(
     countryMap: Map<String, String>,
     randomCountryKey: String,
-    onNextClicked:()-> Unit
+    onNextClicked:()-> Unit,
+    timerSwitch : Boolean
 ) {
     LocalContext.current
     var selectedOption by rememberSaveable { mutableStateOf("Click Here to Select") }
@@ -398,11 +407,38 @@ fun DropdownExample(
     var submitted by rememberSaveable { mutableStateOf(false) } // State to track if the user has submitted their guess
     var nextClicked by rememberSaveable { mutableStateOf(true) }
     var isEnable by rememberSaveable { mutableStateOf(true) }
+    var timerOnNext by rememberSaveable { mutableStateOf(false) }
+
+    if (timerSwitch){
+        TimerBegin(
+            onFinish = {
+                submitted = true
+
+                nextClicked = !nextClicked
+
+                if (nextClicked ){
+                    submitted = false
+                    onNextClicked()
+                    showToast = false
+                    Log.d("NextButtonToggled", "Next button clicked")
+
+                }
+                else{
+                    checkSelectedCountry(selectedCountryKey,randomCountryKey,countryMap)
+                    showToast = true
+                    Log.d("SubmitButtonToggled", "Submit button clicked")
 
 
+                }
+            }
+        )
+    }
     Column(
-        modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+
     ) {
         Text(text = "Select Country")
 
@@ -414,13 +450,16 @@ fun DropdownExample(
         Button(onClick = {
             onNextClicked()
             isEnable = false
-        }, enabled = isEnable
+        }, enabled = isEnable,
+            modifier = Modifier
+                .width(200.dp)
+                .height(35.dp)
         ) {
             Text(text = "Click Here to Start")
         }
         Surface(
             modifier = Modifier
-               .padding(16.dp)
+               .padding(8.dp)
         ) {
             Column(
                 modifier = Modifier.padding(16.dp),
@@ -442,6 +481,7 @@ fun DropdownExample(
                             onNextClicked()
                             showToast = false
                             Log.d("NextButtonToggled", "Next button clicked")
+                            timerOnNext = true
 
                         }
                         else{
@@ -512,6 +552,35 @@ fun DropdownExample(
         }
 
     }
+
+    //Timer When Next is Clicked
+
+//    if (timerOnNext){
+//        if (timerSwitch){
+//            TimerBegin(
+//                onFinish = {
+//                    submitted = true
+//
+//                    nextClicked = !nextClicked
+//
+//                    if (nextClicked ){
+//                        submitted = false
+//                        onNextClicked()
+//                        showToast = false
+//                        Log.d("NextButtonToggled", "Next button clicked")
+//
+//                    }
+//                    else{
+//                        checkSelectedCountry(selectedCountryKey,randomCountryKey,countryMap)
+//                        showToast = true
+//                        Log.d("SubmitButtonToggled", "Submit button clicked")
+//
+//
+//                    }
+//                }
+//            )
+//        }
+//    }
 
 
 
