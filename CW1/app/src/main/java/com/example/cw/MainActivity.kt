@@ -8,6 +8,7 @@ import android.view.RoundedCorner
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
@@ -41,7 +42,7 @@ class MainActivity : ComponentActivity() {
                 Surface(
 
                     modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colors.background
+                    color = Color(0xFFDBE2EF)
 
                 ) {
 
@@ -63,7 +64,7 @@ class MainActivity : ComponentActivity() {
 
                                     Log.d("timerSwitch","${timerSwitch.value}")
                                 },
-                                modifier = Modifier.padding(16.dp) // Add padding for spacing
+                                modifier = Modifier.padding(16.dp)
                             )
                             Surface(
 
@@ -71,14 +72,17 @@ class MainActivity : ComponentActivity() {
                                 modifier = Modifier
                                     .fillMaxWidth(),
                                 shape = RoundedCornerShape(8.dp),
-                                color = MaterialTheme.colors.surface,
+                                color = Color(0xF9F7F7),
                                 elevation = 4.dp,
-                                border = BorderStroke(1.dp, Color.Gray)
+//                                border = BorderStroke(1.dp, Color.Gray)
                             ){
 
                             Row(
                                 modifier = Modifier
-                                    .padding(16.dp)) {
+                                    .padding(16.dp)
+//                                    .background(Color(0xFF6D4C41))
+                            )
+                            {
 
                                 Column(
                                     modifier = Modifier
@@ -97,9 +101,9 @@ class MainActivity : ComponentActivity() {
                                 },
                                     modifier = Modifier.padding(10.dp),
                                     elevation = ButtonDefaults.elevation(8.dp),
-                                    shape = RoundedCornerShape(50), // Adjust the corner radius as needed
+                                    shape = RoundedCornerShape(50),
                                     colors = ButtonDefaults.buttonColors(
-                                        backgroundColor = MaterialTheme.colors.primary,
+                                        backgroundColor = Color(0xFF62D7B4),
                                         contentColor = MaterialTheme.colors.onPrimary
                                 )
                                         ){
@@ -116,7 +120,7 @@ class MainActivity : ComponentActivity() {
                                 modifier = Modifier
                                     .fillMaxWidth(),
                                 shape = RoundedCornerShape(8.dp),
-                                color = MaterialTheme.colors.surface,
+                                color = Color(0xF9F7F7),
                                 elevation = 4.dp,
                                 border = BorderStroke(1.dp, Color.Gray)
                             ){
@@ -138,9 +142,9 @@ class MainActivity : ComponentActivity() {
                                     },
                                         modifier = Modifier.padding(10.dp),
                                         elevation = ButtonDefaults.elevation(8.dp),
-                                        shape = RoundedCornerShape(50), // Adjust the corner radius as needed
+                                        shape = RoundedCornerShape(50),
                                         colors = ButtonDefaults.buttonColors(
-                                            backgroundColor = MaterialTheme.colors.primary,
+                                            backgroundColor = Color(0xFFE2867F),
                                             contentColor = MaterialTheme.colors.onPrimary
                                         )
                                     ){
@@ -159,7 +163,7 @@ class MainActivity : ComponentActivity() {
                                 modifier = Modifier
                                     .fillMaxWidth(),
                                 shape = RoundedCornerShape(8.dp),
-                                color = MaterialTheme.colors.surface,
+                                color = Color(0xF9F7F7),
                                 elevation = 4.dp,
                                 border = BorderStroke(1.dp, Color.Gray)
                             ){
@@ -181,9 +185,9 @@ class MainActivity : ComponentActivity() {
                                     },
                                         modifier = Modifier.padding(10.dp),
                                         elevation = ButtonDefaults.elevation(8.dp),
-                                        shape = RoundedCornerShape(50), // Adjust the corner radius as needed
+                                        shape = RoundedCornerShape(50),
                                         colors = ButtonDefaults.buttonColors(
-                                            backgroundColor = MaterialTheme.colors.primary,
+                                            backgroundColor = Color(0xFFA991E5),
                                             contentColor = MaterialTheme.colors.onPrimary
                                         )
                                     ){
@@ -201,7 +205,7 @@ class MainActivity : ComponentActivity() {
                                 modifier = Modifier
                                     .fillMaxWidth(),
                                 shape = RoundedCornerShape(8.dp),
-                                color = MaterialTheme.colors.surface,
+                                color = Color(0xF9F7F7),
                                 elevation = 4.dp,
                                 border = BorderStroke(1.dp, Color.Gray)
                             ){
@@ -223,24 +227,18 @@ class MainActivity : ComponentActivity() {
                                     },
                                         modifier = Modifier.padding(10.dp),
                                         elevation = ButtonDefaults.elevation(8.dp),
-                                        shape = RoundedCornerShape(50), // Adjust the corner radius as needed
+                                        shape = RoundedCornerShape(50),
                                         colors = ButtonDefaults.buttonColors(
-                                            backgroundColor = MaterialTheme.colors.primary,
+                                            backgroundColor = Color(0xFF52CCE3),
                                             contentColor = MaterialTheme.colors.onPrimary
                                         )
                                     ){
                                         Text(text = "Start",
                                             modifier = Modifier.padding(horizontal = 10.dp, vertical = 10.dp))
                                     }
-
-
-                                }
                             }
-
-
-
                         }
-
+                    }
                 }
             }
         }

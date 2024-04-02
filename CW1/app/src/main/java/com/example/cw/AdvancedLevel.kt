@@ -5,6 +5,7 @@ import android.os.CountDownTimer
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.*
@@ -31,7 +32,10 @@ class AdvancedLevel : ComponentActivity() {
             CwTheme {
                 val timerSwitch = intent.getBooleanExtra("Timer",false)
                 Column (
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(color = Color(0xFFFFFFFF)),
+
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
 
@@ -221,6 +225,7 @@ fun AdvancedLevelContent(
                             textFieldValue_1 = it
                     },
                     enabled = !textB_1,
+
                     colors = TextFieldDefaults.textFieldColors(
                         backgroundColor = if (textB_1) Color.Gray else Color.White, // Change the background color based on the enabled state
                         textColor = (if (textB_1 && textSubmitted){Color.Green} else if (!textB_1 && textSubmitted) {Color.Red} else {
@@ -268,7 +273,7 @@ fun AdvancedLevelContent(
                         backgroundColor = if (textB_3) Color.Gray else Color.White, // Change the background color based on the enabled state
                         textColor = (if (textB_3 && textSubmitted){Color.Green} else if (!textB_3 && textSubmitted) {Color.Red} else {
                             Color.Black
-                        }) as Color  // Change the text color if needed
+                        })
                     ),
                     )
 
@@ -359,7 +364,12 @@ fun AdvancedLevelContent(
 
                         }
 
-                    }) {
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        backgroundColor = Color(0xFF52CCE3),
+                        contentColor = MaterialTheme.colors.onPrimary
+                    ),
+                    ) {
                     Text(text = if (submitted && nextClicked) "Next" else "Submit") // Change the button text based on the submitted state
                 }
 

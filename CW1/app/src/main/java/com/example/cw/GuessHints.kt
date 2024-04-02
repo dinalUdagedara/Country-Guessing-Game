@@ -15,6 +15,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -318,7 +319,7 @@ fun GuessHintsContent(timerSwitch:Boolean) {
     var randomIndex by rememberSaveable { mutableStateOf(Random(seed = System.currentTimeMillis()).nextInt(0, imageResourceIds.size)) }
     val randomImagePainter: Painter = painterResource(id = imageResourceIds[randomIndex])
 
-        LazyColumn {
+    LazyColumn {
             item {
 
 
@@ -440,6 +441,10 @@ fun DropDownHints(
                                     Log.d("NextButtonToggled", "Next button clicked")
                                     checkInput = false
                                 },
+                                colors = ButtonDefaults.buttonColors(
+                                    backgroundColor = Color(0xFFE2867F),
+                                    contentColor = MaterialTheme.colors.onPrimary
+                                ),
                                 enabled = isEnable
                                 ) {
                                 Text(text =  "Click Here to Start") // Change the button text based on the submitted state
@@ -478,7 +483,12 @@ fun DropDownHints(
                                         showDialog =true
                                     }
 
-                                }) {
+                                },
+                                colors = ButtonDefaults.buttonColors(
+                                    backgroundColor = Color(0xFFE2867F),
+                                    contentColor = MaterialTheme.colors.onPrimary
+                                ),
+                                ) {
                                 Text(text = if (nextClicked) "Next" else "Submit") // Change the button text based on the submitted state
                             }
                         }

@@ -6,6 +6,7 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -35,7 +36,8 @@ class GuessCountry : ComponentActivity() {
             CwTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colors.background
+                    color = Color(0xFFFFFFFF)
+
                 ) {
                     val timerSwitch = intent.getBooleanExtra("Timer",false)
                     GuessCountryContent(timerSwitch)
@@ -439,6 +441,7 @@ fun DropdownExample(
             .padding(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
 
+
     ) {
         Text(text = "Select Country")
 
@@ -453,21 +456,29 @@ fun DropdownExample(
         }, enabled = isEnable,
             modifier = Modifier
                 .width(200.dp)
-                .height(35.dp)
+                .height(35.dp),
+            colors = ButtonDefaults.buttonColors(
+                backgroundColor = Color(0xFF52CCE3),
+                contentColor = MaterialTheme.colors.onPrimary
+            )
         ) {
             Text(text = "Click Here to Start")
         }
         Surface(
             modifier = Modifier
-               .padding(8.dp)
+               .padding(8.dp) ,
+            color = Color(0xFFF2F2F2)
         ) {
             Column(
                 modifier = Modifier.padding(16.dp),
+
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Button(
-                    modifier = Modifier.padding(16.dp),
+                    modifier = Modifier
+                        .padding(16.dp),
+
                     enabled = !isEnable,
                     onClick = {
 //                    Log.d("DropdownExample", "Submit button clicked")
@@ -492,14 +503,21 @@ fun DropdownExample(
 
                         }
 
-                    }) {
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        backgroundColor = Color(0xFF52CCE3),
+                        contentColor = MaterialTheme.colors.onPrimary
+                    )
+                    ) {
                     Text(text = if (submitted && !nextClicked) "Next" else "Submit") // Change the button text based on the submitted state
                 }
 
 
                 LazyColumn(
-                    modifier = Modifier.fillMaxWidth(),
-                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(color = Color(0xFFFFFFFF)),
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
                 ) {
                     items(countryMap.keys.toList()) { key ->
                         val value = countryMap[key] ?: ""

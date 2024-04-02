@@ -119,7 +119,11 @@ fun GuessFlagContent(
                     submitClicked = false
                     nextButtonVisible = false },
                     enabled =nextButtonVisible,
-                    modifier = Modifier.padding(top =6.dp )) {
+                    modifier = Modifier.padding(top =6.dp ),
+                    colors = ButtonDefaults.buttonColors(
+                        backgroundColor = Color(0xFFA991E5),
+                        contentColor = MaterialTheme.colors.onPrimary
+                    )) {
                     Text(text = "Next")
                 }
 
@@ -200,7 +204,11 @@ fun FlagButton(
         enabled= !submitClicked,
         modifier = Modifier
             .size(200.dp)
-            .padding(16.dp)
+            .padding(16.dp),
+        colors = ButtonDefaults.buttonColors(
+            backgroundColor = Color(0xFFECEAE5),
+            contentColor = MaterialTheme.colors.onPrimary
+        )
     ) {
         Image(
             painter = randomImagePainter,
